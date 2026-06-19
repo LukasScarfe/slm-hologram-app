@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+html, body {
+  overflow-x: hidden;
+}
+
+:root {
+  --bg-deep: #0B0E14;
+  --bg-panel: #13181F;
+  --bg-elevated: #1C2330;
+  --accent: #00C9A7;
+  --accent-warm: #7B61FF;
+  --text-primary: #E8EDF3;
+  --text-muted: #6B7A90;
+  --danger: #FF5C5C;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}

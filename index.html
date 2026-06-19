@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLM Hologram Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Synchronous (non-module) script runs immediately during HTML parsing,
+         while the popup still has transient activation from window.open(). -->
+    <script>
+      if (new URLSearchParams(window.location.search).get('display')) {
+        var _el = document.documentElement;
+        var _fs = _el.requestFullscreen || _el.webkitRequestFullscreen;
+        if (_fs) _fs.call(_el).catch(function(){});
+      }
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
