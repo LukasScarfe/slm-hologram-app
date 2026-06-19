@@ -39,14 +39,14 @@ export function LabelledSlider({
         style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1, height: '20px' }}
       >
         <Slider.Track style={{ background: '#2a3344', height: '4px', borderRadius: '2px', flex: 1 }}>
-          <Slider.Range style={{ background: '#00C9A7', height: '100%', borderRadius: '2px' }} />
+          <Slider.Range style={{ background: '#22c55e', height: '100%', borderRadius: '2px' }} />
         </Slider.Track>
         <Slider.Thumb
           style={{
             display: 'block',
             width: '14px',
             height: '14px',
-            background: '#00C9A7',
+            background: '#22c55e',
             borderRadius: '50%',
             cursor: 'pointer',
           }}

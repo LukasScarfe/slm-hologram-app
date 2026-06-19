@@ -12,9 +12,26 @@ export function TopBar() {
         flexShrink: 0,
       }}
     >
-      <span style={{ color: '#00C9A7', fontWeight: 700, fontSize: '15px', letterSpacing: '0.02em' }}>
-        ◈ SLM Hologram Studio
-      </span>
+      <a
+        href="https://lukasscarfe.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          textDecoration: 'none',
+        }}
+      >
+        <img
+          src="/logo.png"
+          alt="Logo"
+          style={{ height: '28px', width: 'auto' }}
+        />
+        <span style={{ color: '#22c55e', fontWeight: 700, fontSize: '15px', letterSpacing: '0.02em' }}>
+          SLM Hologram Studio
+        </span>
+      </a>
     </header>
   );
 }

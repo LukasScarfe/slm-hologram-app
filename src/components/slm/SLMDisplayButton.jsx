@@ -11,9 +11,9 @@ const baseBtn = {
   cursor: 'pointer',
 };
 
-const sendBtn   = { ...baseBtn, background: '#00C9A7', color: '#0B0E14' };
+const sendBtn   = { ...baseBtn, background: '#22c55e', color: '#0B0E14' };
 const closeBtn  = { ...baseBtn, background: '#FF5C5C', color: '#fff' };
-const activateBtn = { ...baseBtn, background: '#7B61FF', color: '#fff' };
+const activateBtn = { ...baseBtn, background: '#16a34a', color: '#fff' };
 
 const selectStyle = {
   background: '#1C2330',

@@ -35,7 +35,7 @@ export const MODE_OPTIONS = [
 const selectStyle = {
   background: '#1C2330',
   color: '#E8EDF3',
-  border: '1px solid #00C9A7',
+  border: '1px solid #22c55e',
   borderRadius: '4px',
   padding: '6px 12px',
   fontSize: '13px',

@@ -83,9 +83,9 @@ export function SLMPreview({ slmId }) {
                 onClick={() => setViewMode(key)}
                 style={{
                   ...btnBase,
-                  borderColor:  active ? '#00C9A7' : '#1C2330',
-                  background:   active ? 'rgba(0,201,167,0.12)' : 'transparent',
-                  color:        active ? '#00C9A7' : '#6B7A90',
+                  borderColor:  active ? '#22c55e' : '#1C2330',
+                  background:   active ? 'rgba(34,197,94,0.12)' : 'transparent',
+                  color:        active ? '#22c55e' : '#6B7A90',
                 }}
               >
                 {label}
