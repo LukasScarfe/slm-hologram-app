@@ -64,7 +64,7 @@ export function ModeStack({ slmId }) {
           }}
         >
           <span style={{
-            color: '#6B7A90',
+            color: '#A8B8C8',
             fontSize: '13px',
             background: '#13181F',
             padding: '4px 12px',

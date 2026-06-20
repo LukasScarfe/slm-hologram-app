@@ -131,7 +131,7 @@ export function HologramWindow({ slmId }) {
             Click or press any key to enter fullscreen
           </span>
           <span style={{
-            color: '#6B7A90',
+            color: '#A8B8C8',
             fontSize: '12px',
             fontFamily: 'Inter, sans-serif',
           }}>

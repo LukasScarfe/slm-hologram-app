@@ -27,7 +27,7 @@ const selectStyle = {
 
 const hintStyle = {
   fontSize: '11px',
-  color: '#6B7A90',
+  color: '#A8B8C8',
   fontFamily: 'Inter, sans-serif',
   marginTop: '4px',
 };

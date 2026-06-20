@@ -85,7 +85,7 @@ export function SLMPreview({ slmId }) {
                   ...btnBase,
                   borderColor:  active ? '#22c55e' : '#1C2330',
                   background:   active ? 'rgba(34,197,94,0.12)' : 'transparent',
-                  color:        active ? '#22c55e' : '#6B7A90',
+                  color:        active ? '#22c55e' : '#A8B8C8',
                 }}
               >
                 {label}
@@ -136,7 +136,7 @@ export function SLMPreview({ slmId }) {
               alignItems: 'center',
               gap: '3px',
               fontSize: '10px',
-              color: '#6B7A90',
+              color: '#A8B8C8',
               minWidth: '24px',
             }}
           >

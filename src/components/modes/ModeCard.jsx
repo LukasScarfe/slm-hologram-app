@@ -100,7 +100,7 @@ export function ModeCard({ slmId, modeIndex, mode }) {
           style={{
             background: 'none',
             border: 'none',
-            color: '#6B7A90',
+            color: '#A8B8C8',
             cursor: 'pointer',
             fontSize: '16px',
             padding: '0 4px',
@@ -110,7 +110,7 @@ export function ModeCard({ slmId, modeIndex, mode }) {
         </button>
         <span
           onClick={() => setExpanded((x) => !x)}
-          style={{ color: '#6B7A90', fontSize: '12px', cursor: 'pointer' }}
+          style={{ color: '#A8B8C8', fontSize: '12px', cursor: 'pointer' }}
         >
           {expanded ? '▲' : '▼'}
         </span>

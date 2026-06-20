@@ -45,7 +45,7 @@ export function Tooltip({ tooltipKey, children }) {
           <p style={{ fontWeight: 600, marginBottom: '4px' }}>{entry.label}</p>
           <p style={{ marginBottom: '4px' }}>{entry.description}</p>
           {entry.example && (
-            <p style={{ fontStyle: 'italic', color: '#6B7A90' }}>{entry.example}</p>
+            <p style={{ fontStyle: 'italic', color: '#A8B8C8' }}>{entry.example}</p>
           )}
           <RadixTooltip.Arrow style={{ fill: '#1C2330' }} />
         </RadixTooltip.Content>

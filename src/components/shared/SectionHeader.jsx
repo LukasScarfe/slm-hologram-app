@@ -1,7 +1,7 @@
 export function SectionHeader({ children }) {
   return (
     <h3 style={{
-      color: '#6B7A90',
+      color: '#A8B8C8',
       fontSize: '11px',
       fontWeight: 600,
       letterSpacing: '0.08em',

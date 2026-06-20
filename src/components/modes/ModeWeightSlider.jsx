@@ -14,7 +14,7 @@ export function ModeWeightSlider({ slmId, modeIndex, weight, phaseOffset }) {
           <span
             data-testid="mode-weight-label"
             data-tooltip-key="modeWeight"
-            style={{ color: '#6B7A90', fontSize: '13px', minWidth: '60px' }}
+            style={{ color: '#A8B8C8', fontSize: '13px', minWidth: '60px' }}
           >
             Weight
           </span>
@@ -35,7 +35,7 @@ export function ModeWeightSlider({ slmId, modeIndex, weight, phaseOffset }) {
         <Tooltip tooltipKey="modePhaseOffset">
           <span
             data-tooltip-key="modePhaseOffset"
-            style={{ color: '#6B7A90', fontSize: '13px', minWidth: '60px' }}
+            style={{ color: '#A8B8C8', fontSize: '13px', minWidth: '60px' }}
           >
             Δφ (rad)
           </span>
