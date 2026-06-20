@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { useSLMStore } from '../../store/useSLMStore.js';
 
 const tabBarStyle = {
@@ -59,6 +60,60 @@ const addStyle = {
   flexShrink: 0,
 };
 
+function TabLabel({ slmId, label, active }) {
+  const renameSLM = useSLMStore((s) => s.renameSLM);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(label);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (editing) {
+      setDraft(label);
+      inputRef.current?.select();
+    }
+  }, [editing, label]);
+
+  function commit() {
+    const trimmed = draft.trim();
+    renameSLM(slmId, trimmed || label);
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          borderBottom: '1px solid #22c55e',
+          color: active ? '#E8EDF3' : '#A8B8C8',
+          fontSize: '13px',
+          fontWeight: active ? 600 : 400,
+          outline: 'none',
+          width: `${Math.max(draft.length, 4)}ch`,
+          padding: 0,
+        }}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <span onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}>
+      {label}
+    </span>
+  );
+}
+
 export function SLMTabBar() {
   const slms = useSLMStore((s) => s.slms);
   const activeSLMId = useSLMStore((s) => s.activeSLMId);
@@ -81,15 +136,15 @@ export function SLMTabBar() {
             data-testid={`slm-tab-${index}`}
             style={tabStyle(active)}
             onClick={() => setActiveSLM(slm.id)}
-            aria-label={`Switch to ${slm.name}`}
+            aria-label={`Switch to ${slm.tabLabel ?? slm.name}`}
             aria-selected={active}
           >
-            {slm.name}
+            <TabLabel slmId={slm.id} label={slm.tabLabel ?? slm.name} active={active} />
             {slms.length > 1 && (
               <span
                 data-testid={`remove-slm-${index}`}
                 role="button"
-                aria-label={`Remove ${slm.name}`}
+                aria-label={`Remove ${slm.tabLabel ?? slm.name}`}
                 style={removeStyle}
                 onClick={(e) => handleRemove(e, slm.id)}
                 tabIndex={0}

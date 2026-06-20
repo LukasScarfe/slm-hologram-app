@@ -13,11 +13,13 @@ function clampGamma(gamma, bitDepth) {
   return Math.max(1, Math.min(max, Math.round(gamma)));
 }
 
-function makeSLM(id, preset) {
+function makeSLM(id, preset, tabLabel) {
   const p = preset || CUSTOM_PRESET;
+  const num = id.replace('slm-', '');
   return {
     id,
     name: p.name,
+    tabLabel: tabLabel ?? p.name,
     hardware: {
       resX: p.resX,
       resY: p.resY,
@@ -27,6 +29,7 @@ function makeSLM(id, preset) {
       screenId: null,
     },
     gratingFrequency: { fx: 0, fy: 0 },
+    holoShift: { x: 0, y: 0 },
     gamma: defaultGamma(p.bitDepth),
     encodingMethod: 'exact',
     modes: [],
@@ -76,6 +79,13 @@ export const useSLMStore = create(
       activeSLMId: 'slm-1',
 
       setActiveSLM: (id) => set({ activeSLMId: id }),
+
+      renameSLM: (slmId, label) =>
+        set((state) => ({
+          slms: state.slms.map((s) =>
+            s.id !== slmId ? s : { ...s, tabLabel: label }
+          ),
+        })),
 
       addSLM: () => {
         const id = `slm-${nextSLMId++}`;
@@ -159,6 +169,17 @@ export const useSLMStore = create(
           }),
         })),
 
+      setHoloShift: (slmId, axis, value) =>
+        set((state) => ({
+          slms: state.slms.map((s) => {
+            if (s.id !== slmId) return s;
+            return {
+              ...s,
+              holoShift: { ...s.holoShift, [axis]: value },
+            };
+          }),
+        })),
+
       addMode: (slmId, modeSpec) =>
         set((state) => ({
           slms: state.slms.map((s) => {
@@ -172,6 +193,7 @@ export const useSLMStore = create(
                   weight: modeSpec.weight ?? 1.0,
                   phaseOffset: modeSpec.phaseOffset ?? 0,
                   enabled: modeSpec.enabled ?? true,
+                  nickname: modeSpec.nickname ?? '',
                 },
                 ...s.modes,
               ],
@@ -231,6 +253,19 @@ export const useSLMStore = create(
               ...s,
               modes: s.modes.map((m, i) =>
                 i !== modeIndex ? m : { ...m, phaseOffset }
+              ),
+            };
+          }),
+        })),
+
+      setModeNickname: (slmId, modeIndex, nickname) =>
+        set((state) => ({
+          slms: state.slms.map((s) => {
+            if (s.id !== slmId) return s;
+            return {
+              ...s,
+              modes: s.modes.map((m, i) =>
+                i !== modeIndex ? m : { ...m, nickname }
               ),
             };
           }),
@@ -321,8 +356,11 @@ export const useSLMStore = create(
         ...currentState,
         ...persistedState,
         slms: (persistedState.slms ?? []).map((slm) => ({
+          holoShift: { x: 0, y: 0 },
+          tabLabel: slm.name ?? `SLM ${slm.id?.replace('slm-', '') ?? '?'}`,
           ...TRANSIENT_DEFAULTS,
           ...slm,
+          modes: (slm.modes ?? []).map((m) => ({ nickname: '', ...m })),
         })),
       }),
       onRehydrateStorage: () => (state) => {

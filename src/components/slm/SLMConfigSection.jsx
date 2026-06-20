@@ -5,7 +5,7 @@ import { NumberInput } from '../shared/NumberInput.jsx';
 import { SectionHeader } from '../shared/SectionHeader.jsx';
 import presets from '../../data/slmPresets.json';
 
-const CONTROL_WIDTH = 160;
+const CONTROL_WIDTH = 136;
 
 const selectStyle = {
   background: '#1C2330',
@@ -14,7 +14,7 @@ const selectStyle = {
   borderRadius: '4px',
   padding: '4px 8px',
   fontSize: '13px',
-  width: `${CONTROL_WIDTH}px`,
+  width: '100%',
   cursor: 'pointer',
 };
 
@@ -39,20 +39,17 @@ export function SLMConfigSection({ slmId }) {
   const slm = useSLMStore((state) => state.slms.find((s) => s.id === slmId));
   const selectPreset = useSLMStore((state) => state.selectPreset);
   const updateHardware = useSLMStore((state) => state.updateHardware);
-  const setGamma = useSLMStore((state) => state.setGamma);
-  const setGratingFrequency = useSLMStore((state) => state.setGratingFrequency);
 
   if (!slm) return null;
 
-  const { hardware, gamma, gratingFrequency } = slm;
-  const maxGamma = Math.pow(2, hardware.bitDepth) - 1;
+  const { hardware } = slm;
   const isCustom = slm.name === 'Custom';
 
   function row(label, children) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0' }}>
         <span style={{ color: '#A8B8C8', fontSize: '13px', minWidth: '120px' }}>{label}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', width: `${CONTROL_WIDTH}px` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
           {children}
         </div>
       </div>
@@ -104,7 +101,7 @@ export function SLMConfigSection({ slmId }) {
               min={1}
               max={7680}
               step={1}
-              style={{ flex: 1 }}
+              style={{ width: '65px' }}
               aria-label="Custom resolution width"
             />
             <span style={{ color: '#A8B8C8', fontSize: '13px' }}>×</span>
@@ -115,7 +112,7 @@ export function SLMConfigSection({ slmId }) {
               min={1}
               max={7680}
               step={1}
-              style={{ flex: 1 }}
+              style={{ width: '65px' }}
               aria-label="Custom resolution height"
             />
           </>
@@ -186,84 +183,6 @@ export function SLMConfigSection({ slmId }) {
           <span style={{ color: '#E8EDF3', fontSize: '13px' }}>{hardware.bitDepth}</span>
         )
       )}
-
-      {/* Gamma */}
-      {row(
-        <Tooltip tooltipKey="gamma">
-          <span data-testid="gamma-label" data-tooltip-key="gamma">Gamma (γ)</span>
-        </Tooltip>,
-        <NumberInput
-          data-testid="gamma-input"
-          value={gamma}
-          onChange={(v) => setGamma(slmId, v)}
-          min={1}
-          max={maxGamma}
-          step={1}
-          style={{ flex: 1 }}
-          aria-label="Gamma maximum grey level"
-        />
-      )}
-
-      {/* Wavelength */}
-      {row(
-        <Tooltip tooltipKey="wavelength">
-          <span data-testid="wavelength-label" data-tooltip-key="wavelength">Wavelength</span>
-        </Tooltip>,
-        <>
-          <NumberInput
-            data-testid="wavelength-input"
-            value={hardware.wavelengthNm}
-            onChange={(v) => updateHardware(slmId, 'wavelengthNm', v)}
-            min={200}
-            max={2000}
-            step={1}
-            style={{ flex: 1 }}
-            aria-label="Wavelength in nanometres"
-          />
-          <UnitBadge unit="nm" />
-        </>
-      )}
-
-      {/* Grating θx */}
-      {row(
-        <Tooltip tooltipKey="gratingFx">
-          <span data-testid="grating-fx-label" data-tooltip-key="gratingFx">Grating θₓ</span>
-        </Tooltip>,
-        <>
-          <NumberInput
-            data-testid="grating-fx"
-            value={gratingFrequency.fx}
-            onChange={(v) => setGratingFrequency(slmId, 'fx', v)}
-            min={-60}
-            max={60}
-            step={0.1}
-            style={{ flex: 1 }}
-            aria-label="Grating angle theta x in milliradians"
-          />
-          <UnitBadge unit="mrad" />
-        </>
-      )}
-
-      {/* Grating θy */}
-      {row(
-        <Tooltip tooltipKey="gratingFy">
-          <span data-tooltip-key="gratingFy">Grating θᵧ</span>
-        </Tooltip>,
-        <>
-          <NumberInput
-            data-testid="grating-fy"
-            value={gratingFrequency.fy}
-            onChange={(v) => setGratingFrequency(slmId, 'fy', v)}
-            min={-60}
-            max={60}
-            step={0.1}
-            style={{ flex: 1 }}
-            aria-label="Grating angle theta y in milliradians"
-          />
-          <UnitBadge unit="mrad" />
-        </>
-      )}
-
     </div>
   );
 }

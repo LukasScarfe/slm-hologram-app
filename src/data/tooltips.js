@@ -149,9 +149,9 @@ export const TOOLTIPS = {
     label: 'SLM Hardware Preset',
     description:
       'Loads a predefined set of hardware parameters for a known SLM model. ' +
-      'Sets resolution, pixel pitch, bit depth, and reference wavelength.',
+      'Sets resolution, pixel pitch, and bit depth.',
     example:
-      'Select "Holoeye PLUTO-2.1" when using that device. Switch to "Custom" ' +
+      'Use "Custom" ' +
       'to enter arbitrary hardware parameters for a device not in the list.',
   },
   resolution: {
@@ -166,11 +166,16 @@ export const TOOLTIPS = {
   wavelength: {
     label: 'Wavelength λ (nm)',
     description:
-      'The design wavelength of the hologram. Used when computing lens phases ' +
-      'and other wavelength-dependent modes.',
+      'Wavelength of the light incident on the SLM. ',
+  },
+  holoShift: {
+    label: 'Hologram Shift',
+    description:
+      'Shifts the entire hologram pattern (all modes together) by a fixed number of pixels ' +
+      'in X and Y. Equivalent to adding a global position offset to every mode simultaneously.',
     example:
-      'Set to 532 nm for a green laser, 780 nm for a near-IR Ti:Sapphire system, ' +
-      'or 1064 nm for Nd:YAG.',
+      'Use this to centre the diffracted beam on a camera or aperture without adjusting ' +
+      'each mode individually.',
   },
   positionOffsetX: {
     label: 'Horizontal position shift x₀ (pixels)',

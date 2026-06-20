@@ -52,7 +52,7 @@ export function SLMDisplayButton({ slmId }) {
   }
 
   return (
-    <div style={{ marginTop: '8px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Screen picker */}
         <select

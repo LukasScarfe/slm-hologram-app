@@ -38,6 +38,7 @@ function computeFullRes(slm) {
         encodingMethod: slm.encodingMethod,
         gamma: slm.gamma,
         gratingFrequency: slm.gratingFrequency,
+        holoShift: slm.holoShift,
         fullResolution: true,
       },
     });
@@ -242,36 +243,32 @@ export function SLMExportImport({ slmId }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div style={{ position: 'relative', display: 'inline-block' }}>
-        <button
-          data-testid="export-button"
-          onClick={() => !exportBusy && setMenuOpen((v) => !v)}
-          style={{ ...btnStyle, opacity: exportBusy ? 0.6 : 1 }}
-          disabled={exportBusy}
-        >
-          {exportBusy ? 'Exporting…' : 'Export ▾'}
-        </button>
-        {menuOpen && (
-          <div
-            role="menu"
-            style={menuStyle}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <button
+            data-testid="export-button"
+            onClick={() => !exportBusy && setMenuOpen((v) => !v)}
+            style={{ ...btnStyle, opacity: exportBusy ? 0.6 : 1 }}
+            disabled={exportBusy}
           >
-            {EXPORT_FORMATS.map((f) => (
-              <button
-                key={f.id}
-                role="menuitem"
-                onClick={() => handleExport(f.id)}
-                style={menuItemStyle}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {exportBusy ? 'Exporting…' : 'Export ▾'}
+          </button>
+          {menuOpen && (
+            <div role="menu" style={menuStyle}>
+              {EXPORT_FORMATS.map((f) => (
+                <button
+                  key={f.id}
+                  role="menuitem"
+                  onClick={() => handleExport(f.id)}
+                  style={menuItemStyle}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           data-testid="import-button"
           onClick={() => fileInputRef.current?.click()}
@@ -301,7 +298,6 @@ export function SLMExportImport({ slmId }) {
           onChange={handleFileChange}
         />
       </div>
-
       {importWarning && (
         <div data-testid="import-warning" style={{ color: '#f59e0b', fontSize: '12px' }}>
           {importWarning}

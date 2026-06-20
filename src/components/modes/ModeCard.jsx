@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSLMStore } from '../../store/useSLMStore.js';
 import { ModeWeightSlider } from './ModeWeightSlider.jsx';
 import { GaussianParams } from './params/GaussianParams.jsx';
@@ -50,6 +50,72 @@ const TYPE_LABELS = {
   spiralPhase:     'Spiral',
 };
 
+function ModeTitle({ slmId, modeIndex, typeLabel, nickname }) {
+  const setModeNickname = useSLMStore((s) => s.setModeNickname);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(nickname || '');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (editing) {
+      setDraft(nickname || '');
+      inputRef.current?.select();
+    }
+  }, [editing, nickname]);
+
+  function commit() {
+    setModeNickname(slmId, modeIndex, draft.trim());
+    setEditing(false);
+  }
+
+  const display = nickname || typeLabel;
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        onClick={(e) => e.stopPropagation()}
+        placeholder={typeLabel}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          borderBottom: '1px solid #22c55e',
+          color: '#E8EDF3',
+          fontSize: '13px',
+          fontWeight: 600,
+          outline: 'none',
+          flex: 1,
+          minWidth: 0,
+          padding: 0,
+        }}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <span
+      style={{ color: '#E8EDF3', fontSize: '13px', fontWeight: 600, flex: 1, cursor: 'text' }}
+      title={nickname ? typeLabel : 'Double-click to add nickname'}
+      onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}
+    >
+      {display}
+      {nickname && (
+        <span style={{ color: '#A8B8C8', fontWeight: 400, fontSize: '11px', marginLeft: '6px' }}>
+          {typeLabel}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function ModeCard({ slmId, modeIndex, mode }) {
   const [expanded, setExpanded] = useState(true);
   const removeMode = useSLMStore((s) => s.removeMode);
@@ -88,12 +154,12 @@ export function ModeCard({ slmId, modeIndex, mode }) {
           style={{ cursor: 'pointer' }}
           onClick={(e) => e.stopPropagation()}
         />
-        <span
-          style={{ color: '#E8EDF3', fontSize: '13px', fontWeight: 600, flex: 1 }}
-          onClick={() => setExpanded((x) => !x)}
-        >
-          {TYPE_LABELS[mode.type] ?? mode.type}
-        </span>
+        <ModeTitle
+          slmId={slmId}
+          modeIndex={modeIndex}
+          typeLabel={TYPE_LABELS[mode.type] ?? mode.type}
+          nickname={mode.nickname || ''}
+        />
         <button
           onClick={() => removeMode(slmId, modeIndex)}
           aria-label={`Remove mode ${modeIndex}`}

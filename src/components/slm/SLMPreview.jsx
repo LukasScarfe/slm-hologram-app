@@ -103,7 +103,7 @@ export function SLMPreview({ slmId }) {
             resize: 'horizontal',
             overflow: 'hidden',
             flex: '1 1 auto',
-            maxWidth: '480px',
+            maxWidth: '720px',
             minWidth: '120px',
             aspectRatio: `${resX} / ${resY}`,
             borderRadius: '6px',

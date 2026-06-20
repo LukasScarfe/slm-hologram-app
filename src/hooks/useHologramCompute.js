@@ -15,6 +15,7 @@ function computeParamsSelector(slmId) {
       encodingMethod: s.encodingMethod,
       gamma: s.gamma,
       gratingFrequency: s.gratingFrequency,
+      holoShift: s.holoShift,
       isImported: s.isImported,
     };
   };
@@ -51,6 +52,7 @@ export function useHologramCompute(slmId, canvasRef, viewMode = 'hologram') {
         encodingMethod: slm.encodingMethod,
         gamma: slm.gamma,
         gratingFrequency: slm.gratingFrequency,
+        holoShift: slm.holoShift,
         computeAllViews: true,
       },
     };

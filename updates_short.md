@@ -1,6 +1,16 @@
 # SLM Hologram Studio — What's New
 
+## 2026-06-21
+- **Hologram preview larger.** Default preview width increased to 720 px to better match the height of the config panels.
+- **Hardware Config controls fit properly.** Input widths reduced so Preset, Resolution, and Bit Depth no longer overflow the panel. All controls now stretch to the right edge of their bubble, aligned with the Hologram Parameters panel.
+- **No-grating hologram encoding changed.** Without a carrier grating, holograms are now amplitude-encoded (grey = A × max) so a Gaussian beam reaches full grey level 255. Bolduc/carrier encoding is only used when a grating is applied.
+- **Rename SLM tabs.** Double-click any tab to give it a custom name. Tab names default to the selected preset name.
+- **Mode nicknames.** Double-click a mode card title to add a nickname. The type name appears as a small grey suffix so the mode type is still visible.
+
 ## 2026-06-20
+- **Hardware Config simplified.** Now shows only Preset, Resolution, Pixel Pitch, and Bit Depth.
+- **New "Hologram Parameters" panel** with Wavelength (nm/THz toggle), Gamma (bit/% toggle), Grating θₓ and θᵧ (mrad/Hz toggle), and Hologram Shift X/Y sliders (mm/px toggle). The shift moves all modes together on the SLM.
+- **Display controls in one row.** Screen selector, Send to Display, Export, and Import are now side by side.
 - **Preset no longer changes wavelength.** Switching presets only updates resolution, pixel pitch, and bit depth — wavelength stays as you set it.
 - **Lens:** focal length unit badge moved to the right in green, matching the rest of the UI.
 - **Axicon:** half-angle slider now runs −1.5 to 1.5°, number input is unbounded, and a toggleable **deg/rad** button appears on the right.

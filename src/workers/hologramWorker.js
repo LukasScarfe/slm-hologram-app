@@ -168,7 +168,7 @@ const MODE_FNS = {
   customEquation,
 };
 
-function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFrequency, fullResolution, computeAllViews = true }) {
+function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFrequency, holoShift, fullResolution, computeAllViews = true }) {
   const { resX, resY, pixelPitchMicron, bitDepth } = hardware;
 
   let w, h, pixelPitchM, scale;
@@ -210,13 +210,21 @@ function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFreque
     return { pixels, grey, intensityPixels, phasePixels, fieldPixels, width: w, height: h };
   }
 
+  const shiftX = (holoShift?.x ?? 0) * scale;
+  const shiftY = (holoShift?.y ?? 0) * scale;
+
   const modeInputs = enabledModes.map((m) => {
     const fn = MODE_FNS[m.type];
     let field;
     if (fn) {
       try {
         const scaledParams = scalePixelParams(m.type, m.params || {}, scale);
-        const physParams = buildPhysicsParams(m.type, scaledParams, hardware, w, h, pixelPitchM);
+        const shiftedParams = {
+          ...scaledParams,
+          x0: (scaledParams.x0 ?? 0) + shiftX,
+          y0: (scaledParams.y0 ?? 0) + shiftY,
+        };
+        const physParams = buildPhysicsParams(m.type, shiftedParams, hardware, w, h, pixelPitchM);
         const result = fn(physParams);
         // customEquation may return { error } on invalid equation
         field = (result instanceof Float32Array) ? result : new Float32Array(2 * w * h);
@@ -239,8 +247,21 @@ function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFreque
   const lambda_m = (hardware.wavelengthNm ?? 532) * 1e-9;
   const fx = (gratingFrequency?.fx ?? 0) * 1e-3 * pixelPitchM / lambda_m;
   const fy = (gratingFrequency?.fy ?? 0) * 1e-3 * pixelPitchM / lambda_m;
-  const encodeFn = encodingMethod === 'approximate' ? encodeApproximate : encodeExact;
-  const Psi = encodeFn({ A, Phi, resX: w, resY: h, fx, fy });
+  const hasGrating = fx !== 0 || fy !== 0;
+
+  let Psi;
+  if (hasGrating) {
+    const encodeFn = encodingMethod === 'approximate' ? encodeApproximate : encodeExact;
+    Psi = encodeFn({ A, Phi, resX: w, resY: h, fx, fy });
+  } else {
+    // No carrier grating: encode amplitude directly into [0, 2π] so the full
+    // grey-level range is used. Bolduc encoding without a carrier is meaningless
+    // (its max is bounded to π ≈ grey 128 for real-positive fields).
+    Psi = new Float32Array(w * h);
+    for (let i = 0; i < w * h; i++) {
+      Psi[i] = A[i] * TWO_PI;
+    }
+  }
 
   const maxGamma = gamma ?? (Math.pow(2, bitDepth) - 1);
   const grey = new Uint16Array(w * h);
