@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import presets from '../data/slmPresets.json';
 
-const PLUTO_PRESET = presets.find((p) => p.name === 'Holoeye PLUTO-2.1');
+const CUSTOM_PRESET = presets.find((p) => p.name === 'Custom');
 
 function defaultGamma(bitDepth) {
   return Math.pow(2, bitDepth) - 1;
@@ -14,7 +14,7 @@ function clampGamma(gamma, bitDepth) {
 }
 
 function makeSLM(id, preset) {
-  const p = preset || PLUTO_PRESET;
+  const p = preset || CUSTOM_PRESET;
   return {
     id,
     name: p.name,

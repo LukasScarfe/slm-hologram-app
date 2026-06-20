@@ -1,5 +1,14 @@
 [
   {
+    "name": "Custom",
+    "resX": 1920,
+    "resY": 1080,
+    "pixelPitchMicron": 8.0,
+    "screenDiagInch": 0.7,
+    "bitDepth": 8,
+    "wavelengthNm": 532
+  },
+  {
     "name": "Holoeye PLUTO-2.1",
     "resX": 1920,
     "resY": 1080,
@@ -51,15 +60,6 @@
     "pixelPitchMicron": 15.0,
     "screenDiagInch": 0.45,
     "bitDepth": 10,
-    "wavelengthNm": 532
-  },
-  {
-    "name": "Custom",
-    "resX": 1920,
-    "resY": 1080,
-    "pixelPitchMicron": 8.0,
-    "screenDiagInch": 0.7,
-    "bitDepth": 8,
     "wavelengthNm": 532
   }
 ]
