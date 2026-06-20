@@ -172,4 +172,22 @@ export const TOOLTIPS = {
       'Set to 532 nm for a green laser, 780 nm for a near-IR Ti:Sapphire system, ' +
       'or 1064 nm for Nd:YAG.',
   },
+  positionOffsetX: {
+    label: 'Horizontal position shift x₀ (pixels)',
+    description:
+      'Shifts the centre of this mode horizontally by x₀ pixels relative to the ' +
+      'centre of the SLM. Positive values move the mode to the right.',
+    example:
+      'Set x₀ = 100 to offset the beam centre 100 pixels to the right. ' +
+      'Use this to place multiple modes at different positions across the aperture.',
+  },
+  positionOffsetY: {
+    label: 'Vertical position shift y₀ (pixels)',
+    description:
+      'Shifts the centre of this mode vertically by y₀ pixels relative to the ' +
+      'centre of the SLM. Positive values move the mode downward (screen coordinates).',
+    example:
+      'Set y₀ = −100 to offset the beam centre 100 pixels upward. ' +
+      'Combine with x₀ to place modes anywhere across the SLM aperture.',
+  },
 };

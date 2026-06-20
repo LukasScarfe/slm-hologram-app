@@ -10,6 +10,7 @@ export function ModeStack({ slmId }) {
   const isImported = useSLMStore((state) => {
     return state.slms.find((s) => s.id === slmId)?.isImported ?? false;
   });
+  const clearModes = useSLMStore((s) => s.clearModes);
 
   return (
     <div style={{ position: 'relative' }}>
@@ -21,6 +22,26 @@ export function ModeStack({ slmId }) {
         pointerEvents: isImported ? 'none' : 'auto',
         transition: 'opacity 0.2s',
       }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <ModeSelector slmId={slmId} />
+          {modes.length > 0 && (
+            <button
+              onClick={() => clearModes(slmId)}
+              style={{
+                background: 'transparent',
+                color: '#ef4444',
+                border: '1px solid #ef4444',
+                borderRadius: '4px',
+                padding: '6px 12px',
+                fontSize: '13px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Clear Stack
+            </button>
+          )}
+        </div>
         {modes.map((mode, i) => (
           <ModeCard
             key={i}
@@ -29,9 +50,6 @@ export function ModeStack({ slmId }) {
             mode={mode}
           />
         ))}
-        <div style={{ marginTop: '8px' }}>
-          <ModeSelector slmId={slmId} />
-        </div>
       </div>
       {isImported && (
         <div
