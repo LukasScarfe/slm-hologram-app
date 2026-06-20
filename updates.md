@@ -2,6 +2,11 @@
 
 ## 2026-06-20
 
+### Preset no longer overrides wavelength
+Selecting a hardware preset now only sets resolution, pixel pitch, and bit depth. Wavelength is left unchanged so it can be set independently of the device choice.
+
+**File changed:** `src/store/useSLMStore.js`
+
 ### Lens focal length — unit badge moved to the right
 The focal length label was `f (mm)`. It is now `f` with a green `mm` badge on the right, consistent with the hardware config unit badges.
 

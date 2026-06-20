@@ -1,6 +1,7 @@
 # SLM Hologram Studio — What's New
 
 ## 2026-06-20
+- **Preset no longer changes wavelength.** Switching presets only updates resolution, pixel pitch, and bit depth — wavelength stays as you set it.
 - **Lens:** focal length unit badge moved to the right in green, matching the rest of the UI.
 - **Axicon:** half-angle slider now runs −1.5 to 1.5°, number input is unbounded, and a toggleable **deg/rad** button appears on the right.
 - **Labels lightened:** all non-editable text is noticeably lighter — closer to white.

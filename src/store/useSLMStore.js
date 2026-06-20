@@ -110,7 +110,6 @@ export const useSLMStore = create(
                       resY: preset.resY,
                       pixelPitchMicron: preset.pixelPitchMicron,
                       bitDepth: preset.bitDepth,
-                      wavelengthNm: preset.wavelengthNm,
                     },
                     gamma: defaultGamma(preset.bitDepth),
                   }
