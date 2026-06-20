@@ -13,13 +13,15 @@ export function AxiconParams({ slmId, modeIndex, params }) {
   return (
     <div>
       <LabelledSlider
-        label="half angle (°)"
+        label="half angle"
         data-testid="axicon-angle"
         value={p.halfAngleDeg}
         onChange={(v) => updateModeParam(slmId, modeIndex, 'halfAngleDeg', v)}
-        min={0.1}
-        max={10}
-        step={0.1}
+        min={-1.5}
+        max={1.5}
+        step={0.01}
+        unlimitedInput
+        enableAngleToggle
       />
       <LabelledSlider label="x₀" tooltipKey="positionOffsetX" value={p.x0} onChange={(v) => updateModeParam(slmId, modeIndex, 'x0', v)} min={-resX / 2} max={resX / 2} step={1} unlimitedInput enableUnitToggle pixelPitch={pixelPitch} />
       <LabelledSlider label="y₀" tooltipKey="positionOffsetY" value={p.y0} onChange={(v) => updateModeParam(slmId, modeIndex, 'y0', v)} min={-resY / 2} max={resY / 2} step={1} unlimitedInput enableUnitToggle pixelPitch={pixelPitch} />

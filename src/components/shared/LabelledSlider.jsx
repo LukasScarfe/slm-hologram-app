@@ -3,6 +3,18 @@ import * as Slider from '@radix-ui/react-slider';
 import { Tooltip } from './Tooltip.jsx';
 import { NumberInput } from './NumberInput.jsx';
 
+const DEG_TO_RAD = Math.PI / 180;
+
+const unitButtonBase = {
+  background: 'transparent',
+  borderRadius: '4px',
+  padding: '1px 5px',
+  fontSize: '11px',
+  cursor: 'pointer',
+  width: '100%',
+  lineHeight: '16px',
+};
+
 export function LabelledSlider({
   label,
   tooltipKey,
@@ -13,6 +25,8 @@ export function LabelledSlider({
   step = 0.01,
   unlimitedInput = false,
   enableUnitToggle = false,
+  enableAngleToggle = false,
+  unitLabel,
   pixelPitch,
   'data-testid': testId,
   'data-tooltip-key': _unused,
@@ -21,23 +35,37 @@ export function LabelledSlider({
   numberInputAriaLabel,
 }) {
   const [unit, setUnit] = useState('mm');
+  const [angleUnit, setAngleUnit] = useState('deg');
 
   const pitchMm = pixelPitch ? pixelPitch / 1000 : null;
   const inMm = enableUnitToggle && unit === 'mm' && pitchMm != null;
+  const inRad = enableAngleToggle && angleUnit === 'rad';
 
-  const toDisplay = (px) => inMm ? parseFloat((px * pitchMm).toFixed(4)) : px;
-  const fromDisplay = (d) => inMm ? d / pitchMm : d;
+  const toDisplay = (v) => {
+    if (inMm) return parseFloat((v * pitchMm).toFixed(4));
+    if (inRad) return parseFloat((v * DEG_TO_RAD).toFixed(5));
+    return v;
+  };
+  const fromDisplay = (d) => {
+    if (inMm) return d / pitchMm;
+    if (inRad) return d / DEG_TO_RAD;
+    return d;
+  };
 
   const displayValue = toDisplay(value);
   const displayMin = toDisplay(min);
   const displayMax = toDisplay(max);
-  const displayStep = inMm ? parseFloat((step * pitchMm).toPrecision(4)) : step;
+  const displayStep = inMm
+    ? parseFloat((step * pitchMm).toPrecision(4))
+    : inRad
+    ? parseFloat((step * DEG_TO_RAD).toPrecision(4))
+    : step;
 
   const labelEl = (
     <span
       data-testid={labelTestId}
       data-tooltip-key={tooltipKey}
-      style={{ color: '#6B7A90', fontSize: '13px', minWidth: '32px', display: 'inline-block' }}
+      style={{ color: '#A8B8C8', fontSize: '13px', minWidth: '32px', display: 'inline-block' }}
     >
       {label}
     </span>
@@ -81,24 +109,44 @@ export function LabelledSlider({
         aria-label={numberInputAriaLabel || (label ? `${label} value` : undefined)}
       />
       <div style={{ width: '36px', flexShrink: 0 }}>
-        {enableUnitToggle && pixelPitch && (
+        {enableUnitToggle && pixelPitch ? (
           <button
             onClick={() => setUnit((u) => (u === 'px' ? 'mm' : 'px'))}
             style={{
-              background: 'transparent',
-              color: unit === 'mm' ? '#22c55e' : '#6B7A90',
+              ...unitButtonBase,
+              color: unit === 'mm' ? '#22c55e' : '#A8B8C8',
               border: `1px solid ${unit === 'mm' ? '#22c55e' : '#2a3344'}`,
-              borderRadius: '4px',
-              padding: '1px 5px',
-              fontSize: '11px',
-              cursor: 'pointer',
-              width: '100%',
-              lineHeight: '16px',
             }}
           >
             {unit}
           </button>
-        )}
+        ) : enableAngleToggle ? (
+          <button
+            onClick={() => setAngleUnit((u) => (u === 'deg' ? 'rad' : 'deg'))}
+            style={{
+              ...unitButtonBase,
+              color: '#22c55e',
+              border: '1px solid #22c55e',
+            }}
+          >
+            {angleUnit}
+          </button>
+        ) : unitLabel ? (
+          <span
+            style={{
+              color: '#22c55e',
+              border: '1px solid #22c55e',
+              borderRadius: '4px',
+              padding: '1px 5px',
+              fontSize: '11px',
+              lineHeight: '16px',
+              display: 'block',
+              textAlign: 'center',
+            }}
+          >
+            {unitLabel}
+          </span>
+        ) : null}
       </div>
     </div>
   );
