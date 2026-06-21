@@ -83,6 +83,7 @@ function TabLabel({ slmId, label, active }) {
     return (
       <input
         ref={inputRef}
+        data-testid="slm-tab-rename-input"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}

@@ -15,69 +15,9 @@ import { spiralPhase } from '../physics/modes/spiralPhase.js';
 import { customEquation } from '../physics/modes/customEquation.js';
 import { superpose, normalise, extractAmplitudeAndPhase } from '../physics/hologram.js';
 import { encodeExact, encodeApproximate } from '../physics/intensityMasking.js';
+import { buildFieldPixels, buildIntensityPixels, buildPhasePixels } from './pixelRendering.js';
 
 const TWO_PI = 2 * Math.PI;
-
-// HSV → RGB, all channels in [0, 1].  h wraps at 1.0 (same as 0.0 → red).
-function hsvToRgb(h, s, v) {
-  const i = Math.floor(h * 6) % 6;
-  const f = h * 6 - Math.floor(h * 6);
-  const p = v * (1 - s);
-  const q = v * (1 - f * s);
-  const t = v * (1 - (1 - f) * s);
-  switch (i) {
-    case 0: return [v, t, p];
-    case 1: return [q, v, p];
-    case 2: return [p, v, t];
-    case 3: return [p, q, v];
-    case 4: return [t, p, v];
-    default: return [v, p, q];
-  }
-}
-
-// Phase (HSV hue) × Intensity (HSV value = A²) → RGBA
-// Zero intensity → black; full intensity → exact hue of the phase
-function buildFieldPixels(A, Phi, N) {
-  const px = new Uint8ClampedArray(N * 4);
-  for (let i = 0; i < N; i++) {
-    const hue = (Phi[i] + Math.PI) / TWO_PI;
-    const val = A[i] * A[i]; // intensity
-    const [r, g, b] = hsvToRgb(hue, 1, val);
-    px[i * 4]     = Math.round(r * 255);
-    px[i * 4 + 1] = Math.round(g * 255);
-    px[i * 4 + 2] = Math.round(b * 255);
-    px[i * 4 + 3] = 255;
-  }
-  return px;
-}
-
-// A² → greyscale RGBA  (A normalised to [0,1])
-function buildIntensityPixels(A, N) {
-  const px = new Uint8ClampedArray(N * 4);
-  for (let i = 0; i < N; i++) {
-    const g = Math.round(A[i] * A[i] * 255);
-    px[i * 4]     = g;
-    px[i * 4 + 1] = g;
-    px[i * 4 + 2] = g;
-    px[i * 4 + 3] = 255;
-  }
-  return px;
-}
-
-// Phi ∈ [−π, π] → HSV circular colormap RGBA
-// Hue = (Phi + π) / 2π: −π→red, 0→cyan, +π→red (continuous wrap)
-function buildPhasePixels(Phi, N) {
-  const px = new Uint8ClampedArray(N * 4);
-  for (let i = 0; i < N; i++) {
-    const hue = (Phi[i] + Math.PI) / TWO_PI;
-    const [r, g, b] = hsvToRgb(hue, 1, 1);
-    px[i * 4]     = Math.round(r * 255);
-    px[i * 4 + 1] = Math.round(g * 255);
-    px[i * 4 + 2] = Math.round(b * 255);
-    px[i * 4 + 3] = 255;
-  }
-  return px;
-}
 
 // Scale pixel-space mode parameters for preview grids.
 // Modes specify w0, x0, y0, etc. in units of full-SLM pixels.
@@ -168,7 +108,7 @@ const MODE_FNS = {
   customEquation,
 };
 
-function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFrequency, holoShift, fullResolution, computeAllViews = true }) {
+function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFrequency, holoShift, fullResolution, computeAllViews = true, phaseColormap = 'hsv' }) {
   const { resX, resY, pixelPitchMicron, bitDepth } = hardware;
 
   let w, h, pixelPitchM, scale;
@@ -284,9 +224,9 @@ function computeHologram({ modes, hardware, encodingMethod, gamma, gratingFreque
     pixels[i * 4 + 3] = 255;
   }
 
-  const intensityPixels = computeAllViews ? buildIntensityPixels(A, N)       : null;
-  const phasePixels     = computeAllViews ? buildPhasePixels(Phi, N)         : null;
-  const fieldPixels     = computeAllViews ? buildFieldPixels(A, Phi, N)      : null;
+  const intensityPixels = computeAllViews ? buildIntensityPixels(A, N)                    : null;
+  const phasePixels     = computeAllViews ? buildPhasePixels(Phi, N, phaseColormap)       : null;
+  const fieldPixels     = computeAllViews ? buildFieldPixels(A, Phi, N, phaseColormap)    : null;
   return { pixels, grey, intensityPixels, phasePixels, fieldPixels, width: w, height: h };
 }
 

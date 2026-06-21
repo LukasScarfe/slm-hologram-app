@@ -74,6 +74,7 @@ function ModeTitle({ slmId, modeIndex, typeLabel, nickname }) {
     return (
       <input
         ref={inputRef}
+        data-testid={`mode-nickname-input-${modeIndex}`}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
@@ -102,6 +103,7 @@ function ModeTitle({ slmId, modeIndex, typeLabel, nickname }) {
 
   return (
     <span
+      data-testid={`mode-title-${modeIndex}`}
       style={{ color: '#E8EDF3', fontSize: '13px', fontWeight: 600, flex: 1, cursor: 'text' }}
       title={nickname ? typeLabel : 'Double-click to add nickname'}
       onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}

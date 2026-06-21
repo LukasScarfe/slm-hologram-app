@@ -209,6 +209,9 @@ export function HologramParamsSection({ slmId }) {
           unlimitedInput
           enableUnitToggle
           pixelPitch={hardware.pixelPitchMicron}
+          data-testid="holo-shift-x-slider"
+          numberInputTestId="holo-shift-x-input"
+          numberInputAriaLabel="Hologram shift X"
         />
         <LabelledSlider
           label="Y"
@@ -221,6 +224,9 @@ export function HologramParamsSection({ slmId }) {
           unlimitedInput
           enableUnitToggle
           pixelPitch={hardware.pixelPitchMicron}
+          data-testid="holo-shift-y-slider"
+          numberInputTestId="holo-shift-y-input"
+          numberInputAriaLabel="Hologram shift Y"
         />
       </div>
     </div>

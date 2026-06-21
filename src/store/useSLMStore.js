@@ -32,6 +32,7 @@ function makeSLM(id, preset, tabLabel) {
     holoShift: { x: 0, y: 0 },
     gamma: defaultGamma(p.bitDepth),
     encodingMethod: 'exact',
+    phaseColormap: 'cet_c6',
     modes: [],
     hologramImageData: null,
     windowRef: null,
@@ -157,6 +158,13 @@ export const useSLMStore = create(
             ),
           };
         }),
+
+      setPhaseColormap: (slmId, colormap) =>
+        set((state) => ({
+          slms: state.slms.map((s) =>
+            s.id !== slmId ? s : { ...s, phaseColormap: colormap }
+          ),
+        })),
 
       setGratingFrequency: (slmId, axis, value) =>
         set((state) => ({
@@ -357,6 +365,7 @@ export const useSLMStore = create(
         ...persistedState,
         slms: (persistedState.slms ?? []).map((slm) => ({
           holoShift: { x: 0, y: 0 },
+          phaseColormap: 'cet_c6',
           tabLabel: slm.name ?? `SLM ${slm.id?.replace('slm-', '') ?? '?'}`,
           ...TRANSIENT_DEFAULTS,
           ...slm,

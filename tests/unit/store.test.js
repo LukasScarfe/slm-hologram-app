@@ -15,6 +15,7 @@ beforeEach(async () => {
       {
         id: 'slm-1',
         name: 'Holoeye PLUTO-2.1',
+        tabLabel: 'Holoeye PLUTO-2.1',
         hardware: {
           resX: 1920,
           resY: 1080,
@@ -24,8 +25,10 @@ beforeEach(async () => {
           screenId: null,
         },
         gratingFrequency: { fx: 0, fy: 0 },
+        holoShift: { x: 0, y: 0 },
         gamma: 255,
         encodingMethod: 'exact',
+        phaseColormap: 'cet_c6',
         modes: [],
         hologramImageData: null,
         windowRef: null,
@@ -142,5 +145,72 @@ describe('useSLMStore', () => {
   it('11. encodingMethod is always "exact" (encoding choice removed from UI)', () => {
     const { slms } = store.getState();
     expect(slms[0].encodingMethod).toBe('exact');
+  });
+
+  it('12. setPhaseColormap sets phaseColormap on the target SLM only', () => {
+    const { setPhaseColormap } = store.getState();
+    setPhaseColormap('slm-1', 'hsv');
+    expect(store.getState().slms[0].phaseColormap).toBe('hsv');
+    setPhaseColormap('slm-1', 'cet_c6');
+    expect(store.getState().slms[0].phaseColormap).toBe('cet_c6');
+  });
+
+  it('13. renameSLM updates tabLabel without touching other fields', () => {
+    const { renameSLM } = store.getState();
+    const before = store.getState().slms[0];
+    renameSLM('slm-1', 'My Custom SLM');
+    const after = store.getState().slms[0];
+    expect(after.tabLabel).toBe('My Custom SLM');
+    expect(after.name).toBe(before.name);
+    expect(after.hardware).toEqual(before.hardware);
+  });
+
+  it('14. setModeNickname sets nickname on correct mode index', () => {
+    const { addMode, setModeNickname } = store.getState();
+    addMode('slm-1', { type: 'laguerreGaussian', params: { l: 1, p: 0, w0: 100 } });
+    addMode('slm-1', { type: 'gaussianBeam', params: { w0: 80 } });
+    // Both modes now exist; index 0 is the most recently added (gaussianBeam)
+    setModeNickname('slm-1', 0, 'Flat Gaussian');
+    const modes = store.getState().slms[0].modes;
+    expect(modes[0].nickname).toBe('Flat Gaussian');
+    expect(modes[1].nickname).toBe('');
+  });
+
+  it('15. setHoloShift updates x and y independently', () => {
+    const { setHoloShift } = store.getState();
+    setHoloShift('slm-1', 'x', 100);
+    expect(store.getState().slms[0].holoShift.x).toBe(100);
+    expect(store.getState().slms[0].holoShift.y).toBe(0);
+    setHoloShift('slm-1', 'y', -50);
+    expect(store.getState().slms[0].holoShift.x).toBe(100);
+    expect(store.getState().slms[0].holoShift.y).toBe(-50);
+  });
+
+  it('16. clearModes removes all modes from the target SLM', () => {
+    const { addMode, clearModes } = store.getState();
+    addMode('slm-1', { type: 'laguerreGaussian', params: {} });
+    addMode('slm-1', { type: 'gaussianBeam', params: {} });
+    expect(store.getState().slms[0].modes).toHaveLength(2);
+    clearModes('slm-1');
+    expect(store.getState().slms[0].modes).toHaveLength(0);
+  });
+
+  it('17. addMode prepends: second added mode lands at index 0', () => {
+    const { addMode } = store.getState();
+    addMode('slm-1', { type: 'gaussianBeam',     params: { w0: 100 } });
+    addMode('slm-1', { type: 'laguerreGaussian', params: { l: 1, p: 0, w0: 80 } });
+    const modes = store.getState().slms[0].modes;
+    expect(modes).toHaveLength(2);
+    expect(modes[0].type).toBe('laguerreGaussian');
+    expect(modes[1].type).toBe('gaussianBeam');
+  });
+
+  it('18. selectPreset preserves wavelengthNm', () => {
+    const { updateHardware, selectPreset } = store.getState();
+    updateHardware('slm-1', 'wavelengthNm', 633);
+    expect(store.getState().slms[0].hardware.wavelengthNm).toBe(633);
+    selectPreset('slm-1', 'Meadowlark 512');
+    expect(store.getState().slms[0].hardware.wavelengthNm).toBe(633);
+    expect(store.getState().slms[0].hardware.resX).toBe(512);
   });
 });

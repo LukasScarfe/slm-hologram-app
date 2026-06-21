@@ -1,3 +1,5 @@
+import logoUrl from '/logo.png';
+
 export function TopBar() {
   return (
     <header
@@ -24,7 +26,7 @@ export function TopBar() {
         }}
       >
         <img
-          src="/logo.png"
+          src={logoUrl}
           alt="Logo"
           style={{ height: '28px', width: 'auto' }}
         />

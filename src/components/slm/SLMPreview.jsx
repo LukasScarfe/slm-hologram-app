@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useHologramCompute } from '../../hooks/useHologramCompute.js';
 import { useSLMStore } from '../../store/useSLMStore.js';
+import { CET_C6 } from '../../data/cetC6.js';
 
 const VIEW_MODES = [
   { key: 'hologram',  label: 'Hologram' },
@@ -9,7 +10,10 @@ const VIEW_MODES = [
   { key: 'phase',     label: 'Phase' },
 ];
 
-// Rainbow from +π (top) → −π (bottom): hsl(360°) red → cyan → hsl(0°) red
+// Views that use the phase colormap toggle
+const PHASE_VIEWS = new Set(['phase', 'field']);
+
+// Rainbow from +π (top) → −π (bottom)
 const RAINBOW_V = [
   'hsl(360,100%,50%)',
   'hsl(300,100%,50%)',
@@ -20,25 +24,45 @@ const RAINBOW_V = [
   'hsl(0,100%,50%)',
 ].join(', ');
 
+// Sample CET_C6 at N evenly-spaced stops from entry 255 (top = +π) down to entry 0 (bottom = −π)
+function cetC6GradientCSS(numStops = 24) {
+  const stops = [];
+  for (let i = 0; i <= numStops; i++) {
+    const entry = Math.round(255 * (1 - i / numStops));
+    const idx = entry * 3;
+    stops.push(`rgb(${CET_C6[idx]},${CET_C6[idx + 1]},${CET_C6[idx + 2]})`);
+  }
+  return `linear-gradient(to bottom, ${stops.join(', ')})`;
+}
+
+const CET_C6_GRADIENT = cetC6GradientCSS();
+
 const LEGEND_CONFIG = {
   hologram:  { gradient: 'linear-gradient(to bottom, #fff, #000)', top: '2π', bottom: '0',  title: 'Encoded grey level (0 → 2π)' },
-  field:     { gradient: `linear-gradient(to bottom, ${RAINBOW_V})`, top: '+π', bottom: '−π', title: 'Hue = phase · brightness = intensity' },
+  field:     {
+    hsv:    { gradient: `linear-gradient(to bottom, ${RAINBOW_V})`, title: 'Hue = phase (HSV) · brightness = intensity' },
+    cet_c6: { gradient: CET_C6_GRADIENT, title: 'Hue = phase (CET_C6) · brightness = intensity' },
+  },
   intensity: { gradient: 'linear-gradient(to bottom, #fff, #000)', top: '1',  bottom: '0',  title: 'Normalised intensity A²' },
-  phase:     { gradient: `linear-gradient(to bottom, ${RAINBOW_V})`, top: '+π', bottom: '−π', title: 'Phase Φ ∈ [−π, +π]' },
+  phase:     {
+    hsv:    { gradient: `linear-gradient(to bottom, ${RAINBOW_V})`, title: 'Phase Φ ∈ [−π, +π] (HSV)' },
+    cet_c6: { gradient: CET_C6_GRADIENT, title: 'Phase Φ ∈ [−π, +π] (CET_C6)' },
+  },
 };
 
 export function SLMPreview({ slmId }) {
   const canvasRef = useRef(null);
   const slm = useSLMStore((state) => state.slms.find((s) => s.id === slmId));
+  const setPhaseColormap = useSLMStore((s) => s.setPhaseColormap);
   const [viewMode, setViewMode] = useState('hologram');
 
   useHologramCompute(slmId, canvasRef, viewMode);
 
-  // Draw imported hologram directly when isImported is true
   const isImported     = useSLMStore((s) => s.slms.find((x) => x.id === slmId)?.isImported);
   const importedPixels = useSLMStore((s) => s.slms.find((x) => x.id === slmId)?.importedPixels);
   const importedWidth  = useSLMStore((s) => s.slms.find((x) => x.id === slmId)?.importedWidth);
   const importedHeight = useSLMStore((s) => s.slms.find((x) => x.id === slmId)?.importedHeight);
+  const phaseColormap  = slm?.phaseColormap ?? 'hsv';
 
   useEffect(() => {
     if (!isImported || !importedPixels || !canvasRef.current) return;
@@ -52,7 +76,6 @@ export function SLMPreview({ slmId }) {
     );
   }, [isImported, importedPixels, importedWidth, importedHeight]);
 
-  // Aspect ratio follows actual SLM pixels (or imported image dimensions).
   const resX = isImported ? (importedWidth  ?? slm?.hardware?.resX ?? 1920) : (slm?.hardware?.resX ?? 1920);
   const resY = isImported ? (importedHeight ?? slm?.hardware?.resY ?? 1080) : (slm?.hardware?.resY ?? 1080);
 
@@ -66,13 +89,29 @@ export function SLMPreview({ slmId }) {
     transition: 'background 0.15s, color 0.15s, border-color 0.15s',
   };
 
-  const { gradient, top, bottom, title } = LEGEND_CONFIG[viewMode];
+  // Resolve legend config for current view + colormap
+  let gradient, top, bottom, legendTitle;
+  const rawConfig = LEGEND_CONFIG[viewMode];
+  if (rawConfig && (viewMode === 'phase' || viewMode === 'field')) {
+    const cm = rawConfig[phaseColormap] ?? rawConfig.hsv;
+    gradient = cm.gradient;
+    legendTitle = cm.title;
+    top = '+π';
+    bottom = '−π';
+  } else if (rawConfig) {
+    gradient = rawConfig.gradient;
+    top = rawConfig.top;
+    bottom = rawConfig.bottom;
+    legendTitle = rawConfig.title;
+  }
+
+  const showColormapToggle = !isImported && PHASE_VIEWS.has(viewMode);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
       {/* View mode toggle — hidden when an imported hologram is active */}
       {!isImported && (
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
           {VIEW_MODES.map(({ key, label }) => {
             const active = viewMode === key;
             return (
@@ -92,12 +131,42 @@ export function SLMPreview({ slmId }) {
               </button>
             );
           })}
+
+          {/* Colormap toggle — only shown for Phase / Field views */}
+          {showColormapToggle && (
+            <div style={{ display: 'flex', gap: '2px', marginLeft: '6px', alignItems: 'center' }}>
+              <span style={{ fontSize: '10px', color: '#606878', marginRight: '4px' }}>cmap:</span>
+              {[
+                { id: 'cet_c6', label: 'CET C06' },
+                { id: 'hsv',    label: 'HSV' },
+              ].map(({ id, label }) => {
+                const active = phaseColormap === id;
+                return (
+                  <button
+                    key={id}
+                    data-testid={`colormap-${id}`}
+                    aria-pressed={active}
+                    onClick={() => setPhaseColormap(slmId, id)}
+                    style={{
+                      ...btnBase,
+                      padding: '2px 8px',
+                      borderColor:  active ? '#22c55e' : '#1C2330',
+                      background:   active ? 'rgba(34,197,94,0.12)' : 'transparent',
+                      color:        active ? '#22c55e' : '#A8B8C8',
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
       {/* Canvas + vertical colour legend — legend hidden when imported */}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'stretch' }}>
-        {/* Resizable wrapper — drag right edge; height follows pixel aspect ratio */}
+        {/* Resizable wrapper */}
         <div
           style={{
             resize: 'horizontal',
@@ -127,7 +196,7 @@ export function SLMPreview({ slmId }) {
           />
         </div>
 
-        {/* Vertical legend — stretches to match canvas height */}
+        {/* Vertical legend */}
         {!isImported && (
           <div
             style={{
@@ -144,7 +213,8 @@ export function SLMPreview({ slmId }) {
             <div
               data-testid="preview-legend-bar"
               data-mode={viewMode}
-              title={title}
+              data-colormap={phaseColormap}
+              title={legendTitle}
               style={{
                 flex: 1,
                 width: '12px',

@@ -51,10 +51,11 @@ function writeTempPNG(width, height, fillValue) {
 
 // ── tests ─────────────────────────────────────────────────────────────────────
 
-test('13. Export button opens dropdown with all format options', async ({ page }) => {
+test('13. Export button opens dropdown with all format options including visualization exports', async ({ page }) => {
   await goto(page);
   await expect(page.locator('[data-testid="export-button"]')).toBeVisible();
   await page.locator('[data-testid="export-button"]').click();
+  // Hologram data formats
   await expect(page.getByRole('menuitem', { name: 'PNG (8-bit)' })).toBeVisible();
   await expect(page.getByRole('menuitem', { name: 'PNG (16-bit)' })).toBeVisible();
   await expect(page.getByRole('menuitem', { name: 'TIFF (32-bit)' })).toBeVisible();
@@ -63,6 +64,10 @@ test('13. Export button opens dropdown with all format options', async ({ page }
   await expect(page.getByRole('menuitem', { name: 'NPY' })).toBeVisible();
   await expect(page.getByRole('menuitem', { name: 'Raw Binary' })).toBeVisible();
   await expect(page.getByRole('menuitem', { name: 'Export All SLMs (ZIP)' })).toBeVisible();
+  // Visualization image exports (below separator)
+  await expect(page.getByRole('menuitem', { name: 'Field image (PNG)' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Intensity image (PNG)' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Phase image (PNG)' })).toBeVisible();
 });
 
 test('14. PNG (8-bit) export triggers .png download', async ({ page }) => {
@@ -157,4 +162,34 @@ test('20. Importing unsupported file type shows import-error without crashing', 
   } finally {
     fs.unlinkSync(tmpPath);
   }
+});
+
+test('21. Field image (PNG) export triggers .png download', async ({ page }) => {
+  await goto(page);
+  await page.locator('[data-testid="export-button"]').click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download', { timeout: 15000 }),
+    page.getByRole('menuitem', { name: 'Field image (PNG)' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+});
+
+test('22. Intensity image (PNG) export triggers .png download', async ({ page }) => {
+  await goto(page);
+  await page.locator('[data-testid="export-button"]').click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download', { timeout: 15000 }),
+    page.getByRole('menuitem', { name: 'Intensity image (PNG)' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+});
+
+test('23. Phase image (PNG) export triggers .png download', async ({ page }) => {
+  await goto(page);
+  await page.locator('[data-testid="export-button"]').click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download', { timeout: 15000 }),
+    page.getByRole('menuitem', { name: 'Phase image (PNG)' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
 });

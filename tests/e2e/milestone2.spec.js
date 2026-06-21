@@ -40,11 +40,18 @@ async function selectFromRadix(page, triggerTestId, optionName) {
 }
 
 async function setSliderValue(page, sliderTestId, value, min, max) {
-  const root = page.locator(`[data-testid="${sliderTestId}"]`).first();
-  const box = await root.boundingBox();
-  const fraction = Math.max(0, Math.min(1, (value - min) / (max - min)));
-  await page.mouse.click(box.x + fraction * box.width, box.y + box.height / 2);
-  await page.waitForTimeout(100);
+  // Radix Slider does not respond to synthetic mouse clicks in Playwright.
+  // Focus the thumb and drive it with keyboard ArrowRight / ArrowLeft instead.
+  const thumb = page.locator(`[data-testid="${sliderTestId}"] [role="slider"]`);
+  await thumb.focus();
+  const current = parseFloat(await thumb.getAttribute('aria-valuenow') ?? '0');
+  const diff = Math.round(value - current);
+  if (diff === 0) return;
+  const key = diff > 0 ? 'ArrowRight' : 'ArrowLeft';
+  for (let i = 0; i < Math.abs(diff); i++) {
+    await thumb.press(key);
+  }
+  await page.waitForTimeout(50);
 }
 
 // --- tests ---
@@ -158,13 +165,18 @@ test('21. Phase offset input starts at 0; setting to 3.14159 triggers recompute'
   await page.goto('/');
   await page.waitForLoadState('domcontentloaded');
   await addLGMode(page);
+  // A grating carrier is required: without one the hologram is amplitude-only
+  // (Ψ = A × 2π) and a phase offset has no effect on the output.
+  // With a grating, Bolduc encoding encodes both amplitude and phase, so a
+  // phase offset of π shifts the interference pattern throughout the hologram.
+  await page.locator('[data-testid="grating-fx"]').fill('0.5');
+  await page.locator('[data-testid="grating-fx"]').press('Enter');
   const phaseInput = page.locator('[data-testid="mode-phase-offset"]');
   await expect(phaseInput).toHaveValue('0');
   await page.waitForTimeout(700);
   const before = await getCanvasChecksum(page);
   await phaseInput.fill('3.14159');
   await phaseInput.press('Enter');
-  // Phase offset of π changes the hologram phase pattern for all pixels
   await waitForChecksumChange(page, before);
   expect(true).toBe(true);
 });

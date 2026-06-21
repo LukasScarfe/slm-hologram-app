@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { useSLMStore } from '../../store/useSLMStore.js';
+import { computeFullRes, rgbaToPNG } from '../../workers/computeFullRes.js';
 import { exportPNG8 } from '../../io/exportPNG8.js';
 import { exportPNG16 } from '../../io/exportPNG16.js';
 import { exportTIFF } from '../../io/exportTIFF.js';
@@ -10,50 +11,21 @@ import { exportNPY } from '../../io/exportNPY.js';
 import { exportBin } from '../../io/exportBin.js';
 import { importHologram } from '../../io/importHologram.js';
 
-// Compute a full-resolution hologram for the given SLM state.
-// Returns { grey: Uint16Array, width, height }.
-function computeFullRes(slm) {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(
-      new URL('../../workers/hologramWorker.js', import.meta.url),
-      { type: 'module' }
-    );
-    worker.onmessage = (e) => {
-      const { type, payload } = e.data;
-      if (type === 'RESULT') {
-        worker.terminate();
-        resolve({ grey: payload.grey, width: payload.width, height: payload.height });
-      } else if (type === 'ERROR') {
-        worker.terminate();
-        reject(new Error(payload.error));
-      }
-    };
-    worker.onerror = (err) => { worker.terminate(); reject(err); };
-    worker.postMessage({
-      type: 'COMPUTE',
-      payload: {
-        slmId: slm.id,
-        modes: slm.modes,
-        hardware: slm.hardware,
-        encodingMethod: slm.encodingMethod,
-        gamma: slm.gamma,
-        gratingFrequency: slm.gratingFrequency,
-        holoShift: slm.holoShift,
-        fullResolution: true,
-      },
-    });
-  });
-}
+const SEPARATOR = Object.freeze({ id: 'separator' });
 
 const EXPORT_FORMATS = [
-  { id: 'png8',  label: 'PNG (8-bit)',           ext: 'png',  mime: 'image/png' },
-  { id: 'png16', label: 'PNG (16-bit)',           ext: 'png',  mime: 'image/png' },
-  { id: 'tiff',  label: 'TIFF (32-bit)',          ext: 'tif',  mime: 'image/tiff' },
-  { id: 'bmp',   label: 'BMP',                    ext: 'bmp',  mime: 'image/bmp' },
-  { id: 'csv',   label: 'CSV',                    ext: 'csv',  mime: 'text/csv' },
-  { id: 'npy',   label: 'NPY',                    ext: 'npy',  mime: 'application/octet-stream' },
-  { id: 'bin',   label: 'Raw Binary',             ext: 'bin',  mime: 'application/octet-stream' },
-  { id: 'zip',   label: 'Export All SLMs (ZIP)', ext: 'zip',  mime: 'application/zip' },
+  { id: 'png8',           label: 'PNG (8-bit)',           ext: 'png',  mime: 'image/png' },
+  { id: 'png16',          label: 'PNG (16-bit)',           ext: 'png',  mime: 'image/png' },
+  { id: 'tiff',           label: 'TIFF (32-bit)',          ext: 'tif',  mime: 'image/tiff' },
+  { id: 'bmp',            label: 'BMP',                    ext: 'bmp',  mime: 'image/bmp' },
+  { id: 'csv',            label: 'CSV',                    ext: 'csv',  mime: 'text/csv' },
+  { id: 'npy',            label: 'NPY',                    ext: 'npy',  mime: 'application/octet-stream' },
+  { id: 'bin',            label: 'Raw Binary',             ext: 'bin',  mime: 'application/octet-stream' },
+  { id: 'zip',            label: 'Export All SLMs (ZIP)',  ext: 'zip',  mime: 'application/zip' },
+  SEPARATOR,
+  { id: 'view_field',     label: 'Field image (PNG)',      ext: 'png',  mime: 'image/png' },
+  { id: 'view_intensity', label: 'Intensity image (PNG)',  ext: 'png',  mime: 'image/png' },
+  { id: 'view_phase',     label: 'Phase image (PNG)',      ext: 'png',  mime: 'image/png' },
 ];
 
 function triggerDownload(data, filename, mime) {
@@ -144,7 +116,7 @@ export function SLMExportImport({ slmId }) {
       return;
     }
 
-    const { grey, width: w, height: h } = await computeFullRes(slm);
+    const { grey, fieldPixels, intensityPixels, phasePixels, width: w, height: h } = await computeFullRes(slm);
     const gamma = slm?.gamma || 255;
 
     let buf, filename, mime;
@@ -209,6 +181,24 @@ export function SLMExportImport({ slmId }) {
         mime = 'application/octet-stream';
         break;
       }
+      case 'view_field': {
+        buf = rgbaToPNG(fieldPixels, w, h);
+        filename = `${slmName}_field.png`;
+        mime = 'image/png';
+        break;
+      }
+      case 'view_intensity': {
+        buf = rgbaToPNG(intensityPixels, w, h);
+        filename = `${slmName}_intensity.png`;
+        mime = 'image/png';
+        break;
+      }
+      case 'view_phase': {
+        buf = rgbaToPNG(phasePixels, w, h);
+        filename = `${slmName}_phase.png`;
+        mime = 'image/png';
+        break;
+      }
       default:
         return;
     }
@@ -256,16 +246,20 @@ export function SLMExportImport({ slmId }) {
           </button>
           {menuOpen && (
             <div role="menu" style={menuStyle}>
-              {EXPORT_FORMATS.map((f) => (
-                <button
-                  key={f.id}
-                  role="menuitem"
-                  onClick={() => handleExport(f.id)}
-                  style={menuItemStyle}
-                >
-                  {f.label}
-                </button>
-              ))}
+              {EXPORT_FORMATS.map((f) =>
+                f === SEPARATOR
+                  ? <hr key="separator" style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #2a3547' }} />
+                  : (
+                    <button
+                      key={f.id}
+                      role="menuitem"
+                      onClick={() => handleExport(f.id)}
+                      style={menuItemStyle}
+                    >
+                      {f.label}
+                    </button>
+                  )
+              )}
             </div>
           )}
         </div>

@@ -1,5 +1,18 @@
 # SLM Hologram Studio — What's New
 
+## 2026-06-22 (session 2)
+- **Pixel rendering split into its own module.** `buildPhasePixels`, `buildIntensityPixels`, and `buildFieldPixels` moved out of the hologram worker into `pixelRendering.js`, making them independently unit-testable.
+- **Full-resolution compute extracted from the export component.** The worker-spawning logic that drives exports now lives in `computeFullRes.js` rather than inside a React component.
+- **Export format list cleaned up.** The separator between hologram data and visualisation image exports is now a named constant instead of a magic `{ id: 'sep' }` object.
+- **New data-testid attributes** added to the Clear Stack button, SLM tab rename input, mode title/nickname inputs, and hologram shift sliders — enabling targeted tests.
+- **20 new end-to-end tests** covering: colormap toggle default and visibility, canvas change on HSV switch, legend data-colormap updates, Field/Intensity/Phase PNG downloads, SLM tab renaming (commit and cancel), mode nickname entry (commit and cancel), hologram shift canvas recompute, Clear Stack button behaviour, mode prepend order, and preset/wavelength independence.
+- **17 new unit tests** for `hsvToRgb`, `cetC6Lookup`, `buildPhasePixels`, `buildIntensityPixels`, and `buildFieldPixels`.
+- **7 new store unit tests** for `setPhaseColormap`, `renameSLM`, `setModeNickname`, `setHoloShift`, `clearModes`, addMode prepend, and `selectPreset` wavelength preservation.
+
+## 2026-06-22
+- **Phase colormap toggle.** Phase and Field views now have an HSV / CET C06 toggle in the preview toolbar. Default is CET C06 — a perceptually uniform cyclic map (R→Y→G→C→B→M→R). The colour legend updates to match. Setting persists per SLM.
+- **Export Field, Intensity, and Phase images.** Three new items in the Export dropdown save full-resolution coloured PNG images of each visualisation view.
+
 ## 2026-06-21
 - **Hologram preview larger.** Default preview width increased to 720 px to better match the height of the config panels.
 - **Hardware Config controls fit properly.** Input widths reduced so Preset, Resolution, and Bit Depth no longer overflow the panel. All controls now stretch to the right edge of their bubble, aligned with the Hologram Parameters panel.

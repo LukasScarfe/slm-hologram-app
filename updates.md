@@ -1,5 +1,43 @@
 # SLM Hologram Studio — Update Log
 
+## 2026-06-22 (session 2)
+
+### Test coverage expansion
+Identified and closed major test coverage gaps across all milestone features.
+
+**New files:** `tests/e2e/features.spec.js` (20 new e2e tests: colormap toggle, tab renaming, mode nicknames, hologram shift, clear stack, mode prepend order, preset/wavelength independence); `tests/unit/pixelRendering.test.js` (17 unit tests covering `buildPhasePixels`, `buildIntensityPixels`, `buildFieldPixels`, `hsvToRgb`, `cetC6Lookup`)
+**Files changed:** `tests/unit/store.test.js` (7 new tests: `setPhaseColormap`, `renameSLM`, `setModeNickname`, `setHoloShift`, `clearModes`, addMode prepend, selectPreset preserves wavelength); `tests/e2e/milestone6.spec.js` (test 13 extended to check visualisation export items; tests 21–23 for Field/Intensity/Phase PNG download triggers)
+
+### Code structure improvements
+- Extracted `buildPhasePixels`, `buildIntensityPixels`, `buildFieldPixels`, `hsvToRgb`, `cetC6Lookup` from `hologramWorker.js` into `src/workers/pixelRendering.js`. The worker now imports them; all functions are independently unit-testable without running a worker.
+- Extracted `computeFullRes` and `rgbaToPNG` from `SLMExportImport.jsx` into `src/workers/computeFullRes.js`. Component now imports from there; the worker-spawning logic is no longer embedded in a React component.
+- Replaced `{ id: 'sep' }` magic sentinel in `EXPORT_FORMATS` with a named `SEPARATOR` constant and reference-equality check (`f === SEPARATOR`).
+
+**New files:** `src/workers/pixelRendering.js`, `src/workers/computeFullRes.js`
+**Files changed:** `src/workers/hologramWorker.js`, `src/components/slm/SLMExportImport.jsx`
+
+### data-testid additions for testability
+Added `data-testid` attributes to UI elements that lacked them:
+- `data-testid="clear-stack-button"` on Clear Stack button in `ModeStack.jsx`
+- `data-testid="slm-tab-rename-input"` on the inline rename input in `SLMTabBar.jsx`
+- `data-testid="mode-title-{index}"` on ModeTitle span and `data-testid="mode-nickname-input-{index}"` on its editing input in `ModeCard.jsx`
+- `data-testid="holo-shift-x-slider"` / `"holo-shift-y-slider"` and `numberInputTestId="holo-shift-x-input"` / `"holo-shift-y-input"` on the LabelledSlider calls in `HologramParamsSection.jsx`
+
+**Files changed:** `src/components/modes/ModeStack.jsx`, `src/components/layout/SLMTabBar.jsx`, `src/components/modes/ModeCard.jsx`, `src/components/slm/HologramParamsSection.jsx`
+
+## 2026-06-22
+
+### Phase colormap toggle — HSV or CET C06
+Phase and Field visualisation views now support two colourmap choices via a toggle in the preview toolbar. The default is **CET C06** (`cyclic_rygcbmr_50_90_c64` from Colorcet), a perceptually uniform cyclic map that cycles R→Y→G→C→B→M→R. The alternative is the previous **HSV** rainbow. The selection persists per SLM in localStorage. The colour legend bar updates to match. Both views (Phase and Field) honour the setting — Field applies the chosen hue mapping with intensity as brightness.
+
+**New file:** `src/data/cetC6.js` (256-entry `Uint8Array` lookup table, CC0, sourced from `github.com/holoviz/colorcet`)
+**Files changed:** `src/workers/hologramWorker.js`, `src/store/useSLMStore.js`, `src/hooks/useHologramCompute.js`, `src/components/slm/SLMPreview.jsx`
+
+### Visualisation image exports
+Three new entries in the Export dropdown (below a separator): **Field image (PNG)**, **Intensity image (PNG)**, **Phase image (PNG)**. Each renders the full-resolution SLM at the currently selected phase colourmap and saves as a 32-bit-per-pixel RGBA PNG via `fast-png`.
+
+**File changed:** `src/components/slm/SLMExportImport.jsx`
+
 ## 2026-06-21
 
 ### Hologram preview enlarged

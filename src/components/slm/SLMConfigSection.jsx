@@ -180,7 +180,7 @@ export function SLMConfigSection({ slmId }) {
             </Select.Portal>
           </Select.Root>
         ) : (
-          <span style={{ color: '#E8EDF3', fontSize: '13px' }}>{hardware.bitDepth}</span>
+          <span data-testid="bit-depth-select" style={{ color: '#E8EDF3', fontSize: '13px' }}>{hardware.bitDepth}</span>
         )
       )}
     </div>

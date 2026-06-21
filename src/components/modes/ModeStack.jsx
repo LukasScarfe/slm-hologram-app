@@ -26,6 +26,7 @@ export function ModeStack({ slmId }) {
           <ModeSelector slmId={slmId} />
           {modes.length > 0 && (
             <button
+              data-testid="clear-stack-button"
               onClick={() => clearModes(slmId)}
               style={{
                 background: 'transparent',

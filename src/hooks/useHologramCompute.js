@@ -17,6 +17,7 @@ function computeParamsSelector(slmId) {
       gratingFrequency: s.gratingFrequency,
       holoShift: s.holoShift,
       isImported: s.isImported,
+      phaseColormap: s.phaseColormap ?? 'hsv',
     };
   };
 }
@@ -53,6 +54,7 @@ export function useHologramCompute(slmId, canvasRef, viewMode = 'hologram') {
         gamma: slm.gamma,
         gratingFrequency: slm.gratingFrequency,
         holoShift: slm.holoShift,
+        phaseColormap: slm.phaseColormap,
         computeAllViews: true,
       },
     };

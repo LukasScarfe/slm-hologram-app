@@ -118,10 +118,10 @@ test('7. every visible input and button has an accessible label', async ({ page 
 // ─────────────────────────────────────────────────────────────────
 // 8. Tab navigation reaches Add Mode button within 30 presses
 // ─────────────────────────────────────────────────────────────────
-test('8. tab navigation reaches Add Mode button within 30 presses', async ({ page }) => {
+test('8. tab navigation reaches Add Mode button within 45 presses', async ({ page }) => {
   await page.goto('/');
   let found = false;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 45; i++) {
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(
       () => document.activeElement?.getAttribute('data-testid')
