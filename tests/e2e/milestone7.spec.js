@@ -161,11 +161,12 @@ test('10. npm run build exits 0 and dist/ has expected files', async () => {
 });
 
 // ─────────────────────────────────────────────────────────────────
-// 11. dist/index.html contains the /slm-hologram-app/ base path
+// 11. dist/index.html references assets at root-relative paths
 // ─────────────────────────────────────────────────────────────────
-test('11. dist/index.html contains /slm-hologram-app/ base path', async () => {
+test('11. dist/index.html references assets at root-relative paths', async () => {
   const distHtml = readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf-8');
-  expect(distHtml).toContain('/slm-hologram-app/');
+  // With base:'/' the script src should start with /assets/, not /slm-hologram-app/assets/
+  expect(distHtml).toMatch(/src="\/assets\//);
 });
 
 // ─────────────────────────────────────────────────────────────────
@@ -175,15 +176,24 @@ test.describe('preview build test', () => {
   let previewProcess;
 
   test.beforeAll(async () => {
-    // Start vite preview serving dist/ at the correct base path on port 4174
+    // Kill any stale process on port 4174 left by a previous test run
+    try {
+      execSync(
+        'for /f "tokens=5" %i in (\'netstat -ano ^| findstr LISTENING ^| findstr :4174\') do taskkill /F /PID %i',
+        { shell: true, stdio: 'ignore' }
+      );
+    } catch { /* no stale process */ }
+
+    // Invoke vite directly via node so kill() terminates the real process on Windows
+    const viteBin = path.join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
     previewProcess = spawn(
-      'npx',
-      ['vite', 'preview', '--base', '/slm-hologram-app/', '--port', '4174'],
-      { cwd: ROOT, shell: true, detached: false }
+      process.execPath,
+      [viteBin, 'preview', '--port', '4174'],
+      { cwd: ROOT }
     );
 
     // Poll until the preview server is accepting connections
-    const previewUrl = 'http://localhost:4174/slm-hologram-app/';
+    const previewUrl = 'http://localhost:4174/';
     for (let i = 0; i < 30; i++) {
       try {
         await fetch(previewUrl);
@@ -195,18 +205,23 @@ test.describe('preview build test', () => {
   });
 
   test.afterAll(() => {
-    if (previewProcess) {
+    if (previewProcess && !previewProcess.killed) {
       try { previewProcess.kill(); } catch {}
     }
   });
 
   test('12. built app loads without console errors', async ({ page }) => {
     const consoleErrors = [];
+    const failedUrls = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') consoleErrors.push(msg.text());
     });
-    await page.goto('http://localhost:4174/slm-hologram-app/');
+    page.on('response', (res) => {
+      if (res.status() === 404) failedUrls.push(res.url());
+    });
+    await page.goto('http://localhost:4174/');
     await page.waitForLoadState('networkidle');
+    expect(failedUrls, `404 URLs: ${failedUrls.join(', ')}`).toHaveLength(0);
     expect(consoleErrors).toHaveLength(0);
   });
 });
